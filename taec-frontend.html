@@ -1,0 +1,1484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TAEC v3 - Advanced Cognitive Evolution System</title>
+    
+    <!-- CSS Dependencies -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/dracula.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #6366f1;
+            --secondary: #818cf8;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+            --dark: #1f2937;
+            --light: #f3f4f6;
+            --quantum: #c084fc;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .background-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(139, 92, 246, 0.5);
+            border-radius: 50%;
+            animation: float 20s infinite;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) translateX(100px);
+                opacity: 0;
+            }
+        }
+
+        /* Header */
+        .header {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(139, 92, 246, 0.3);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #6366f1, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Cards */
+        .glass-card {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.3);
+            border-color: rgba(139, 92, 246, 0.5);
+        }
+
+        /* Status Indicators */
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 0.5rem;
+            animation: pulse 2s infinite;
+        }
+
+        .status-active {
+            background: #10b981;
+            box-shadow: 0 0 10px #10b981;
+        }
+
+        .status-idle {
+            background: #f59e0b;
+            box-shadow: 0 0 10px #f59e0b;
+        }
+
+        .status-error {
+            background: #ef4444;
+            box-shadow: 0 0 10px #ef4444;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 0.7;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Metrics Display */
+        .metric-card {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(192, 132, 252, 0.1));
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 12px;
+            padding: 1rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .metric-card:hover {
+            transform: scale(1.05);
+            border-color: rgba(139, 92, 246, 0.6);
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #6366f1, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .metric-label {
+            font-size: 0.875rem;
+            color: #94a3b8;
+            margin-top: 0.25rem;
+        }
+
+        /* Code Editor */
+        .CodeMirror {
+            height: 400px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        /* Buttons */
+        .btn-quantum {
+            background: linear-gradient(135deg, #6366f1, #c084fc);
+            border: none;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-quantum:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.4);
+        }
+
+        .btn-quantum::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn-quantum:active::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        /* Progress Bars */
+        .progress-quantum {
+            background: rgba(30, 41, 59, 0.8);
+            border-radius: 10px;
+            height: 10px;
+            overflow: hidden;
+            margin: 0.5rem 0;
+        }
+
+        .progress-bar-quantum {
+            background: linear-gradient(90deg, #6366f1, #c084fc);
+            height: 100%;
+            transition: width 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-bar-quantum::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                transform: translateX(-100%);
+            }
+            100% {
+                transform: translateX(100%);
+            }
+        }
+
+        /* Tabs */
+        .nav-tabs {
+            border-bottom: 1px solid rgba(139, 92, 246, 0.3);
+        }
+
+        .nav-tabs .nav-link {
+            color: #94a3b8;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-tabs .nav-link:hover {
+            color: #c084fc;
+            background: rgba(139, 92, 246, 0.1);
+        }
+
+        .nav-tabs .nav-link.active {
+            color: #fff;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(192, 132, 252, 0.2));
+            border-bottom: 2px solid #6366f1;
+        }
+
+        /* Visualizations */
+        .visualization-container {
+            background: rgba(15, 23, 42, 0.8);
+            border-radius: 12px;
+            padding: 1rem;
+            height: 400px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Terminal */
+        .terminal {
+            background: #0f172a;
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.875rem;
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+
+        .terminal-line {
+            margin: 0.25rem 0;
+        }
+
+        .terminal-prompt {
+            color: #10b981;
+        }
+
+        .terminal-output {
+            color: #e2e8f0;
+        }
+
+        .terminal-error {
+            color: #ef4444;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .metric-card {
+                margin-bottom: 1rem;
+            }
+            
+            .logo {
+                font-size: 1.25rem;
+            }
+        }
+
+        /* Loading Animation */
+        .quantum-loader {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(139, 92, 246, 0.3);
+            border-radius: 50%;
+            border-top-color: #6366f1;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Tooltips */
+        .tooltip-custom {
+            position: relative;
+            cursor: help;
+        }
+
+        .tooltip-custom::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(30, 41, 59, 0.95);
+            color: #e2e8f0;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            margin-bottom: 0.5rem;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+
+        .tooltip-custom:hover::after {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Animation -->
+    <div class="background-animation" id="bgAnimation"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <div class="logo">
+                        <i class="fas fa-brain"></i>
+                        TAEC v3.0
+                    </div>
+                </div>
+                <div class="col-md-6 text-end">
+                    <span class="status-indicator status-active"></span>
+                    <span class="me-3">System Active</span>
+                    <button class="btn btn-sm btn-outline-light" onclick="toggleDarkMode()">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container my-4">
+        <!-- System Metrics -->
+        <div class="row mb-4">
+            <div class="col-md-3 col-sm-6">
+                <div class="metric-card">
+                    <div class="metric-value" id="evolutionScore">0.85</div>
+                    <div class="metric-label">Evolution Score</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="metric-card">
+                    <div class="metric-value" id="quantumCoherence">0.72</div>
+                    <div class="metric-label">Quantum Coherence</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="metric-card">
+                    <div class="metric-value" id="activeNodes">247</div>
+                    <div class="metric-label">Active Nodes</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="metric-card">
+                    <div class="metric-value" id="emergencePatterns">12</div>
+                    <div class="metric-label">Emergence Patterns</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Interface -->
+        <div class="row">
+            <!-- Left Panel - Code Editor -->
+            <div class="col-lg-6">
+                <div class="glass-card">
+                    <h5 class="mb-3">
+                        <i class="fas fa-code me-2"></i>
+                        MSC-Lang Editor
+                    </h5>
+                    
+                    <!-- Code Templates -->
+                    <div class="mb-3">
+                        <select class="form-select bg-dark text-light border-secondary" id="templateSelect">
+                            <option value="">Select a template...</option>
+                            <option value="quantum_synthesis">Quantum Synthesis</option>
+                            <option value="pattern_detection">Pattern Detection</option>
+                            <option value="evolution_optimizer">Evolution Optimizer</option>
+                            <option value="node_analysis">Node Analysis</option>
+                        </select>
+                    </div>
+
+                    <!-- Code Editor -->
+                    <textarea id="codeEditor"></textarea>
+
+                    <!-- Action Buttons -->
+                    <div class="mt-3 d-flex gap-2">
+                        <button class="btn btn-quantum" onclick="compileCode()">
+                            <i class="fas fa-play me-2"></i>
+                            Compile & Run
+                        </button>
+                        <button class="btn btn-outline-light" onclick="saveCode()">
+                            <i class="fas fa-save me-2"></i>
+                            Save
+                        </button>
+                        <button class="btn btn-outline-light" onclick="clearEditor()">
+                            <i class="fas fa-trash me-2"></i>
+                            Clear
+                        </button>
+                    </div>
+
+                    <!-- Compilation Output -->
+                    <div class="mt-3">
+                        <div class="terminal" id="compilationOutput">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">$</span>
+                                <span class="terminal-output"> Ready for compilation...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel - Visualizations & Controls -->
+            <div class="col-lg-6">
+                <!-- Tabs -->
+                <ul class="nav nav-tabs" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" data-bs-toggle="tab" href="#visualization">
+                            <i class="fas fa-chart-network me-2"></i>
+                            Visualization
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="tab" href="#quantum">
+                            <i class="fas fa-atom me-2"></i>
+                            Quantum State
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="tab" href="#evolution">
+                            <i class="fas fa-dna me-2"></i>
+                            Evolution
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="tab" href="#metrics">
+                            <i class="fas fa-chart-line me-2"></i>
+                            Metrics
+                        </a>
+                    </li>
+                </ul>
+
+                <!-- Tab Content -->
+                <div class="tab-content">
+                    <!-- Visualization Tab -->
+                    <div class="tab-pane fade show active" id="visualization">
+                        <div class="glass-card">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="mb-0">System Graph</h5>
+                                <div class="btn-group btn-group-sm">
+                                    <button class="btn btn-outline-light" onclick="changeVisualization('graph')">
+                                        Graph
+                                    </button>
+                                    <button class="btn btn-outline-light" onclick="changeVisualization('memory')">
+                                        Memory
+                                    </button>
+                                    <button class="btn btn-outline-light" onclick="changeVisualization('3d')">
+                                        3D
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="visualization-container" id="mainVisualization">
+                                <canvas id="graphCanvas" width="800" height="400"></canvas>
+                            </div>
+
+                            <div class="mt-3">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <small class="text-muted">Nodes:</small>
+                                        <strong id="nodeCount">0</strong>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="text-muted">Edges:</small>
+                                        <strong id="edgeCount">0</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quantum Tab -->
+                    <div class="tab-pane fade" id="quantum">
+                        <div class="glass-card">
+                            <h5 class="mb-3">Quantum Memory State</h5>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Coherence Level</label>
+                                    <div class="progress-quantum">
+                                        <div class="progress-bar-quantum" style="width: 72%"></div>
+                                    </div>
+                                    <small class="text-muted">72% - Good</small>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Entanglement Strength</label>
+                                    <div class="progress-quantum">
+                                        <div class="progress-bar-quantum" style="width: 58%"></div>
+                                    </div>
+                                    <small class="text-muted">58% - Moderate</small>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Quantum Algorithm</label>
+                                <select class="form-select bg-dark text-light border-secondary">
+                                    <option>Grover Search</option>
+                                    <option>QAOA Optimization</option>
+                                    <option>VQE Solver</option>
+                                    <option>Quantum Annealing</option>
+                                </select>
+                            </div>
+
+                            <button class="btn btn-quantum w-100" onclick="runQuantumAlgorithm()">
+                                <i class="fas fa-atom me-2"></i>
+                                Execute Quantum Algorithm
+                            </button>
+
+                            <div class="mt-3">
+                                <canvas id="quantumStateChart" width="400" height="200"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Evolution Tab -->
+                    <div class="tab-pane fade" id="evolution">
+                        <div class="glass-card">
+                            <h5 class="mb-3">Evolution Control</h5>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Evolution Strategy</label>
+                                <select class="form-select bg-dark text-light border-secondary" id="strategySelect">
+                                    <option value="synthesis">Synthesis</option>
+                                    <option value="optimization">Optimization</option>
+                                    <option value="exploration">Exploration</option>
+                                    <option value="consolidation">Consolidation</option>
+                                    <option value="recovery">Recovery</option>
+                                    <option value="innovation">Innovation</option>
+                                </select>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Population Size</label>
+                                    <input type="range" class="form-range" min="10" max="200" value="50" id="populationSize">
+                                    <small class="text-muted">50 individuals</small>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Mutation Rate</label>
+                                    <input type="range" class="form-range" min="0" max="100" value="15" id="mutationRate">
+                                    <small class="text-muted">15%</small>
+                                </div>
+                            </div>
+
+                            <button class="btn btn-quantum w-100 mb-3" onclick="startEvolution()">
+                                <i class="fas fa-dna me-2"></i>
+                                Start Evolution Cycle
+                            </button>
+
+                            <div class="mb-3">
+                                <label class="form-label">Evolution Progress</label>
+                                <div class="progress-quantum">
+                                    <div class="progress-bar-quantum" id="evolutionProgress" style="width: 0%"></div>
+                                </div>
+                            </div>
+
+                            <canvas id="fitnessChart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Metrics Tab -->
+                    <div class="tab-pane fade" id="metrics">
+                        <div class="glass-card">
+                            <h5 class="mb-3">System Metrics</h5>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <div class="metric-card">
+                                        <div class="metric-value">98.2%</div>
+                                        <div class="metric-label">Uptime</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="metric-card">
+                                        <div class="metric-value">42ms</div>
+                                        <div class="metric-label">Avg Response</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="metric-card">
+                                        <div class="metric-value">1.2GB</div>
+                                        <div class="metric-label">Memory Usage</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="metric-card">
+                                        <div class="metric-value">87%</div>
+                                        <div class="metric-label">Cache Hit Rate</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button class="btn btn-outline-light w-100" onclick="exportMetrics()">
+                                <i class="fas fa-download me-2"></i>
+                                Export Metrics Report
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Control Panel -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="glass-card">
+                    <h5 class="mb-3">
+                        <i class="fas fa-cogs me-2"></i>
+                        System Control
+                    </h5>
+                    
+                    <div class="row">
+                        <div class="col-md-3">
+                            <button class="btn btn-quantum w-100 mb-2" onclick="saveState()">
+                                <i class="fas fa-save me-2"></i>
+                                Save State
+                            </button>
+                        </div>
+                        <div class="col-md-3">
+                            <button class="btn btn-outline-light w-100 mb-2" onclick="loadState()">
+                                <i class="fas fa-upload me-2"></i>
+                                Load State
+                            </button>
+                        </div>
+                        <div class="col-md-3">
+                            <button class="btn btn-outline-warning w-100 mb-2" onclick="resetSystem()">
+                                <i class="fas fa-redo me-2"></i>
+                                Reset System
+                            </button>
+                        </div>
+                        <div class="col-md-3">
+                            <button class="btn btn-outline-danger w-100 mb-2" onclick="emergencyStop()">
+                                <i class="fas fa-stop me-2"></i>
+                                Emergency Stop
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center py-4 mt-5">
+        <p class="text-muted mb-0">
+            TAEC v3.0 - Advanced Cognitive Evolution System
+            <br>
+            <small>© 2024 TAEC Team. All rights reserved.</small>
+        </p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/python/python.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <script>
+        // Initialize CodeMirror
+        const editor = CodeMirror.fromTextArea(document.getElementById('codeEditor'), {
+            mode: 'python',
+            theme: 'dracula',
+            lineNumbers: true,
+            autoCloseBrackets: true,
+            matchBrackets: true,
+            indentUnit: 4,
+            extraKeys: {
+                "Ctrl-Space": "autocomplete",
+                "Ctrl-Enter": compileCode
+            }
+        });
+
+        // API Configuration
+        const API_BASE = window.location.hostname === 'localhost' 
+            ? 'http://localhost:8000/api/v1' 
+            : '/api/v1';
+
+        // WebSocket connection for real-time updates
+        let ws = null;
+        
+        function connectWebSocket() {
+            const wsUrl = window.location.hostname === 'localhost'
+                ? 'ws://localhost:8000/ws'
+                : `wss://${window.location.host}/ws`;
+                
+            ws = new WebSocket(wsUrl);
+            
+            ws.onopen = () => {
+                console.log('WebSocket connected');
+                updateStatus('active');
+            };
+            
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                handleRealtimeUpdate(data);
+            };
+            
+            ws.onerror = (error) => {
+                console.error('WebSocket error:', error);
+                updateStatus('error');
+            };
+            
+            ws.onclose = () => {
+                console.log('WebSocket disconnected');
+                updateStatus('idle');
+                // Reconnect after 5 seconds
+                setTimeout(connectWebSocket, 5000);
+            };
+        }
+
+        // Initialize WebSocket connection
+        connectWebSocket();
+
+        // Background Animation
+        function createBackgroundAnimation() {
+            const container = document.getElementById('bgAnimation');
+            const particleCount = 50;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+                container.appendChild(particle);
+            }
+        }
+
+        createBackgroundAnimation();
+
+        // Template System
+        const codeTemplates = {
+            quantum_synthesis: `# Quantum Synthesis Pattern
+synth quantum_synthesis {
+    # Initialize quantum state
+    quantum dimensions = 8;
+    nodes = graph.get_high_value_nodes();
+    
+    monad StateMonad = quantum_state(dimensions);
+    
+    # Create superposition
+    superposition = StateMonad >>= lambda state: {
+        for i, node in enumerate(nodes[:dimensions]) {
+            state[i] = node.state * exp(1j * node.phase);
+        }
+        return normalize(state);
+    };
+    
+    # Apply quantum circuit
+    circuit = QuantumCircuit();
+    circuit.add_gate("H", [0]);  # Hadamard
+    circuit.add_gate("CNOT", [0, 1]);  # Entanglement
+    
+    evolved_state = circuit.apply(superposition);
+    
+    # Store result
+    quantum_memory.store("synthesis_result", evolved_state);
+}`,
+            
+            pattern_detection: `# Pattern Detection Algorithm
+pattern EmergenceDetector {
+    threshold: float = 0.7;
+    min_size: int = 3;
+}
+
+function detect_emergence(graph) {
+    patterns = [];
+    
+    for cluster in graph.get_clusters() {
+        density = calculate_density(cluster);
+        coherence = calculate_coherence(cluster);
+        
+        if density > 0.6 and coherence > threshold {
+            pattern = EmergenceDetector {
+                nodes => cluster.nodes,
+                score => density * coherence
+            };
+            patterns.append(pattern);
+        }
+    }
+    
+    return patterns;
+}`,
+            
+            evolution_optimizer: `# Adaptive Evolution Optimizer
+class EvolutionOptimizer {
+    function __init__(self) {
+        self.generation = 0;
+        self.population_size = 50;
+        self.mutation_rate = 0.15;
+    }
+    
+    async function evolve(population) {
+        # Evaluate fitness
+        fitness_scores = [self.evaluate(ind) for ind in population];
+        
+        # Selection
+        new_population = [];
+        elite = self.select_elite(population, fitness_scores);
+        new_population.extend(elite);
+        
+        # Crossover and mutation
+        while len(new_population) < self.population_size {
+            parent1 = self.tournament_select(population);
+            parent2 = self.tournament_select(population);
+            
+            child = self.crossover(parent1, parent2);
+            
+            if random() < self.mutation_rate {
+                child = self.mutate(child);
+            }
+            
+            new_population.append(child);
+        }
+        
+        self.generation += 1;
+        return new_population;
+    }
+}`,
+            
+            node_analysis: `# Advanced Node Analysis
+function analyze_node(node) {
+    # Calculate base metrics
+    connectivity = len(node.connections_out);
+    centrality = calculate_centrality(node);
+    
+    # Pattern matching for node type
+    match node.state {
+        case x if x > 0.8 => {
+            category = "high_value";
+            boost = 1.2;
+        }
+        case x if x < 0.3 => {
+            category = "low_value";
+            boost = 0.8;
+        }
+        case _ => {
+            category = "normal";
+            boost = 1.0;
+        }
+    }
+    
+    # Calculate final score
+    score = (node.state * boost + connectivity * 0.1 + centrality * 0.2);
+    
+    return {
+        "node_id": node.id,
+        "score": score,
+        "category": category,
+        "metrics": {
+            "state": node.state,
+            "connectivity": connectivity,
+            "centrality": centrality
+        }
+    };
+}`
+        };
+
+        // Template selection
+        document.getElementById('templateSelect').addEventListener('change', function() {
+            const selected = this.value;
+            if (selected && codeTemplates[selected]) {
+                editor.setValue(codeTemplates[selected]);
+            }
+        });
+
+        // Compile Code
+        async function compileCode() {
+            const code = editor.getValue();
+            const output = document.getElementById('compilationOutput');
+            
+            output.innerHTML = '<div class="terminal-line"><span class="terminal-prompt">$</span> <span class="terminal-output">Compiling MSC-Lang code...</span></div>';
+            
+            try {
+                const response = await axios.post(`${API_BASE}/compile`, {
+                    code: code
+                });
+                
+                if (response.data.success) {
+                    output.innerHTML += '<div class="terminal-line"><span class="terminal-output">✓ Compilation successful!</span></div>';
+                    output.innerHTML += '<div class="terminal-line"><span class="terminal-output">  Lines compiled: ' + response.data.lines + '</span></div>';
+                    
+                    if (response.data.warnings && response.data.warnings.length > 0) {
+                        output.innerHTML += '<div class="terminal-line"><span class="terminal-output" style="color: #f59e0b;">  Warnings: ' + response.data.warnings.join(', ') + '</span></div>';
+                    }
+                    
+                    // Execute if requested
+                    if (response.data.execute) {
+                        output.innerHTML += '<div class="terminal-line"><span class="terminal-prompt">$</span> <span class="terminal-output">Executing...</span></div>';
+                        const execResult = await executeCode(response.data.compiled_code);
+                        displayExecutionResult(execResult);
+                    }
+                } else {
+                    output.innerHTML += '<div class="terminal-line"><span class="terminal-error">✗ Compilation failed!</span></div>';
+                    response.data.errors.forEach(error => {
+                        output.innerHTML += '<div class="terminal-line"><span class="terminal-error">  ' + error + '</span></div>';
+                    });
+                }
+            } catch (error) {
+                output.innerHTML += '<div class="terminal-line"><span class="terminal-error">✗ Error: ' + error.message + '</span></div>';
+            }
+            
+            // Scroll to bottom
+            output.scrollTop = output.scrollHeight;
+        }
+
+        // Execute compiled code
+        async function executeCode(compiledCode) {
+            try {
+                const response = await axios.post(`${API_BASE}/execute`, {
+                    code: compiledCode
+                });
+                return response.data;
+            } catch (error) {
+                return { success: false, error: error.message };
+            }
+        }
+
+        // Display execution results
+        function displayExecutionResult(result) {
+            const output = document.getElementById('compilationOutput');
+            
+            if (result.success) {
+                output.innerHTML += '<div class="terminal-line"><span class="terminal-output">✓ Execution completed successfully!</span></div>';
+                
+                if (result.metrics) {
+                    output.innerHTML += '<div class="terminal-line"><span class="terminal-output">  Execution time: ' + result.metrics.execution_time.toFixed(3) + 's</span></div>';
+                    output.innerHTML += '<div class="terminal-line"><span class="terminal-output">  Nodes created: ' + result.metrics.nodes_created + '</span></div>';
+                    output.innerHTML += '<div class="terminal-line"><span class="terminal-output">  State changes: ' + result.metrics.state_changes + '</span></div>';
+                }
+            } else {
+                output.innerHTML += '<div class="terminal-line"><span class="terminal-error">✗ Execution failed: ' + result.error + '</span></div>';
+            }
+        }
+
+        // Save Code
+        function saveCode() {
+            const code = editor.getValue();
+            const blob = new Blob([code], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'taec_code_' + new Date().getTime() + '.mscl';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Clear Editor
+        function clearEditor() {
+            if (confirm('Are you sure you want to clear the editor?')) {
+                editor.setValue('');
+            }
+        }
+
+        // Update Status
+        function updateStatus(status) {
+            const indicator = document.querySelector('.status-indicator');
+            const text = document.querySelector('.header .me-3');
+            
+            indicator.className = 'status-indicator';
+            
+            switch(status) {
+                case 'active':
+                    indicator.classList.add('status-active');
+                    text.textContent = 'System Active';
+                    break;
+                case 'idle':
+                    indicator.classList.add('status-idle');
+                    text.textContent = 'System Idle';
+                    break;
+                case 'error':
+                    indicator.classList.add('status-error');
+                    text.textContent = 'System Error';
+                    break;
+            }
+        }
+
+        // Handle real-time updates
+        function handleRealtimeUpdate(data) {
+            switch(data.type) {
+                case 'metrics':
+                    updateMetrics(data.data);
+                    break;
+                case 'graph':
+                    updateGraph(data.data);
+                    break;
+                case 'evolution':
+                    updateEvolution(data.data);
+                    break;
+                case 'quantum':
+                    updateQuantum(data.data);
+                    break;
+            }
+        }
+
+        // Update metrics display
+        function updateMetrics(metrics) {
+            if (metrics.evolution_score !== undefined) {
+                document.getElementById('evolutionScore').textContent = metrics.evolution_score.toFixed(2);
+            }
+            if (metrics.quantum_coherence !== undefined) {
+                document.getElementById('quantumCoherence').textContent = metrics.quantum_coherence.toFixed(2);
+            }
+            if (metrics.active_nodes !== undefined) {
+                document.getElementById('activeNodes').textContent = metrics.active_nodes;
+            }
+            if (metrics.emergence_patterns !== undefined) {
+                document.getElementById('emergencePatterns').textContent = metrics.emergence_patterns;
+            }
+        }
+
+        // Graph Visualization
+        let graphCanvas = document.getElementById('graphCanvas');
+        let graphCtx = graphCanvas.getContext('2d');
+        let graphData = { nodes: [], edges: [] };
+
+        function drawGraph() {
+            graphCtx.clearRect(0, 0, graphCanvas.width, graphCanvas.height);
+            
+            // Draw edges
+            graphCtx.strokeStyle = 'rgba(139, 92, 246, 0.3)';
+            graphCtx.lineWidth = 1;
+            
+            graphData.edges.forEach(edge => {
+                const source = graphData.nodes.find(n => n.id === edge.source);
+                const target = graphData.nodes.find(n => n.id === edge.target);
+                
+                if (source && target) {
+                    graphCtx.beginPath();
+                    graphCtx.moveTo(source.x, source.y);
+                    graphCtx.lineTo(target.x, target.y);
+                    graphCtx.stroke();
+                }
+            });
+            
+            // Draw nodes
+            graphData.nodes.forEach(node => {
+                const gradient = graphCtx.createRadialGradient(node.x, node.y, 0, node.x, node.y, node.size);
+                gradient.addColorStop(0, `rgba(99, 102, 241, ${node.state})`);
+                gradient.addColorStop(1, `rgba(192, 132, 252, ${node.state * 0.5})`);
+                
+                graphCtx.fillStyle = gradient;
+                graphCtx.beginPath();
+                graphCtx.arc(node.x, node.y, node.size, 0, 2 * Math.PI);
+                graphCtx.fill();
+                
+                // Node border
+                graphCtx.strokeStyle = `rgba(139, 92, 246, ${node.state})`;
+                graphCtx.lineWidth = 2;
+                graphCtx.stroke();
+            });
+            
+            // Update counts
+            document.getElementById('nodeCount').textContent = graphData.nodes.length;
+            document.getElementById('edgeCount').textContent = graphData.edges.length;
+        }
+
+        // Initialize with sample data
+        function initializeGraph() {
+            const nodeCount = 20;
+            const width = graphCanvas.width;
+            const height = graphCanvas.height;
+            
+            // Generate random nodes
+            for (let i = 0; i < nodeCount; i++) {
+                graphData.nodes.push({
+                    id: `node_${i}`,
+                    x: Math.random() * (width - 40) + 20,
+                    y: Math.random() * (height - 40) + 20,
+                    size: Math.random() * 10 + 5,
+                    state: Math.random()
+                });
+            }
+            
+            // Generate random edges
+            for (let i = 0; i < nodeCount * 0.8; i++) {
+                const source = `node_${Math.floor(Math.random() * nodeCount)}`;
+                const target = `node_${Math.floor(Math.random() * nodeCount)}`;
+                
+                if (source !== target) {
+                    graphData.edges.push({ source, target });
+                }
+            }
+            
+            drawGraph();
+        }
+
+        initializeGraph();
+
+        // Evolution Control
+        async function startEvolution() {
+            const strategy = document.getElementById('strategySelect').value;
+            const populationSize = document.getElementById('populationSize').value;
+            const mutationRate = document.getElementById('mutationRate').value / 100;
+            
+            try {
+                const response = await axios.post(`${API_BASE}/evolution/start`, {
+                    strategy: strategy,
+                    population_size: parseInt(populationSize),
+                    mutation_rate: mutationRate
+                });
+                
+                if (response.data.success) {
+                    // Start progress animation
+                    animateEvolutionProgress();
+                }
+            } catch (error) {
+                console.error('Evolution error:', error);
+            }
+        }
+
+        function animateEvolutionProgress() {
+            let progress = 0;
+            const progressBar = document.getElementById('evolutionProgress');
+            
+            const interval = setInterval(() => {
+                progress += Math.random() * 5;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(interval);
+                }
+                progressBar.style.width = progress + '%';
+            }, 200);
+        }
+
+        // Quantum Algorithm
+        async function runQuantumAlgorithm() {
+            const algorithm = document.querySelector('#quantum select').value;
+            
+            try {
+                const response = await axios.post(`${API_BASE}/quantum/execute`, {
+                    algorithm: algorithm
+                });
+                
+                if (response.data.success) {
+                    // Update quantum visualization
+                    updateQuantumVisualization(response.data.result);
+                }
+            } catch (error) {
+                console.error('Quantum execution error:', error);
+            }
+        }
+
+        // Charts
+        let fitnessChart = null;
+        let quantumChart = null;
+
+        function initializeCharts() {
+            // Fitness Chart
+            const fitnessCtx = document.getElementById('fitnessChart').getContext('2d');
+            fitnessChart = new Chart(fitnessCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Best Fitness',
+                        data: [],
+                        borderColor: 'rgb(99, 102, 241)',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        tension: 0.4
+                    }, {
+                        label: 'Average Fitness',
+                        data: [],
+                        borderColor: 'rgb(192, 132, 252)',
+                        backgroundColor: 'rgba(192, 132, 252, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#e2e8f0'
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: '#94a3b8' },
+                            grid: { color: 'rgba(148, 163, 184, 0.1)' }
+                        },
+                        y: {
+                            ticks: { color: '#94a3b8' },
+                            grid: { color: 'rgba(148, 163, 184, 0.1)' }
+                        }
+                    }
+                }
+            });
+            
+            // Quantum State Chart
+            const quantumCtx = document.getElementById('quantumStateChart').getContext('2d');
+            quantumChart = new Chart(quantumCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['|0⟩', '|1⟩', '|2⟩', '|3⟩', '|4⟩', '|5⟩', '|6⟩', '|7⟩'],
+                    datasets: [{
+                        label: 'Amplitude',
+                        data: [0.35, 0.35, 0.15, 0.15, 0, 0, 0, 0],
+                        backgroundColor: 'rgba(192, 132, 252, 0.6)',
+                        borderColor: 'rgb(192, 132, 252)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#e2e8f0'
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: '#94a3b8' },
+                            grid: { color: 'rgba(148, 163, 184, 0.1)' }
+                        },
+                        y: {
+                            ticks: { color: '#94a3b8' },
+                            grid: { color: 'rgba(148, 163, 184, 0.1)' },
+                            beginAtZero: true,
+                            max: 1
+                        }
+                    }
+                }
+            });
+        }
+
+        initializeCharts();
+
+        // System Control Functions
+        async function saveState() {
+            try {
+                const response = await axios.post(`${API_BASE}/system/save`);
+                if (response.data.success) {
+                    alert('System state saved successfully!');
+                }
+            } catch (error) {
+                alert('Error saving state: ' + error.message);
+            }
+        }
+
+        async function loadState() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.pkl';
+            
+            input.onchange = async (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const formData = new FormData();
+                    formData.append('state_file', file);
+                    
+                    try {
+                        const response = await axios.post(`${API_BASE}/system/load`, formData);
+                        if (response.data.success) {
+                            alert('System state loaded successfully!');
+                            location.reload();
+                        }
+                    } catch (error) {
+                        alert('Error loading state: ' + error.message);
+                    }
+                }
+            };
+            
+            input.click();
+        }
+
+        function resetSystem() {
+            if (confirm('Are you sure you want to reset the system? This action cannot be undone.')) {
+                axios.post(`${API_BASE}/system/reset`)
+                    .then(() => {
+                        alert('System reset successfully!');
+                        location.reload();
+                    })
+                    .catch(error => {
+                        alert('Error resetting system: ' + error.message);
+                    });
+            }
+        }
+
+        function emergencyStop() {
+            if (confirm('Execute emergency stop? All running processes will be terminated.')) {
+                axios.post(`${API_BASE}/system/emergency-stop`)
+                    .then(() => {
+                        updateStatus('idle');
+                        alert('Emergency stop executed!');
+                    })
+                    .catch(error => {
+                        alert('Error executing emergency stop: ' + error.message);
+                    });
+            }
+        }
+
+        function exportMetrics() {
+            axios.get(`${API_BASE}/metrics/export`, { responseType: 'blob' })
+                .then(response => {
+                    const url = window.URL.createObjectURL(new Blob([response.data]));
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.setAttribute('download', `taec_metrics_${new Date().getTime()}.json`);
+                    document.body.appendChild(link);
+                    link.click();
+                    link.remove();
+                })
+                .catch(error => {
+                    alert('Error exporting metrics: ' + error.message);
+                });
+        }
+
+        // Visualization switching
+        function changeVisualization(type) {
+            const container = document.getElementById('mainVisualization');
+            
+            switch(type) {
+                case 'graph':
+                    container.innerHTML = '<canvas id="graphCanvas" width="800" height="400"></canvas>';
+                    graphCanvas = document.getElementById('graphCanvas');
+                    graphCtx = graphCanvas.getContext('2d');
+                    drawGraph();
+                    break;
+                case 'memory':
+                    // Memory visualization implementation
+                    container.innerHTML = '<div class="text-center py-5">Memory visualization coming soon...</div>';
+                    break;
+                case '3d':
+                    // 3D visualization implementation
+                    container.innerHTML = '<div class="text-center py-5">3D visualization coming soon...</div>';
+                    break;
+            }
+        }
+
+        // Dark mode toggle
+        function toggleDarkMode() {
+            document.body.classList.toggle('light-mode');
+            // Save preference
+            localStorage.setItem('darkMode', document.body.classList.contains('light-mode') ? 'false' : 'true');
+        }
+
+        // Load dark mode preference
+        if (localStorage.getItem('darkMode') === 'false') {
+            document.body.classList.add('light-mode');
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case 's':
+                        e.preventDefault();
+                        saveCode();
+                        break;
+                    case 'Enter':
+                        e.preventDefault();
+                        compileCode();
+                        break;
+                }
+            }
+        });
+
+        // Auto-save functionality
+        let autoSaveTimer;
+        editor.on('change', () => {
+            clearTimeout(autoSaveTimer);
+            autoSaveTimer = setTimeout(() => {
+                // Save to localStorage
+                localStorage.setItem('taec_code_draft', editor.getValue());
+            }, 2000);
+        });
+
+        // Load draft on startup
+        const draft = localStorage.getItem('taec_code_draft');
+        if (draft) {
+            editor.setValue(draft);
+        }
+
+        // Periodic metrics update
+        setInterval(async () => {
+            try {
+                const response = await axios.get(`${API_BASE}/metrics/current`);
+                updateMetrics(response.data);
+            } catch (error) {
+                console.error('Error fetching metrics:', error);
+            }
+        }, 5000);
+
+        // Initialize tooltips
+        const tooltips = document.querySelectorAll('[data-tooltip]');
+        tooltips.forEach(el => {
+            el.classList.add('tooltip-custom');
+        });
+    </script>
+</body>
+</html>
